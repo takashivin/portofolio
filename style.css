@@ -300,7 +300,7 @@ p {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: transform 0.5s ease;
 }
 
 .refresh-btn:hover {
@@ -312,11 +312,8 @@ p {
     transform: scale(0.95);
 }
 
-.spin-anim {
-    animation: spin 0.6s linear infinite;
-}
-
 @keyframes spin {
+    0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
@@ -588,7 +585,6 @@ p {
     display: none; 
 }
 
-/* --- DRM SIMULATION CLASSES --- */
 .drm-protected {
     -webkit-user-drag: none;
     -khtml-user-drag: none;
