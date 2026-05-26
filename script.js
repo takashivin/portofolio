@@ -61,14 +61,10 @@ const closeModal = document.getElementById('closeModal');
 const ctscanImg = document.getElementById('ctscan-img');
 const loadingText = document.getElementById('loadingText');
 
-ctscanImg.classList.add('drm-protected');
-
 triggerCtscan.addEventListener('click', () => {
     imageModal.classList.add('active');
-    
     if (!ctscanImg.getAttribute('src')) {
         ctscanImg.src = ctscanBase64;
-        
         ctscanImg.onload = () => { 
             loadingText.style.display = 'none'; 
             ctscanImg.style.display = 'block'; 
@@ -77,26 +73,8 @@ triggerCtscan.addEventListener('click', () => {
 });
 
 const hideModal = () => { imageModal.classList.remove('active'); };
-
 closeModal.addEventListener('click', hideModal);
-
-imageModal.addEventListener('click', (e) => { 
-    if (e.target === imageModal) hideModal(); 
-});
-
-imageModal.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-});
-
-window.addEventListener('blur', () => {
-    if (imageModal.classList.contains('active') && ctscanImg.style.display === 'block') {
-        ctscanImg.classList.add('drm-blur');
-    }
-});
-
-window.addEventListener('focus', () => {
-    ctscanImg.classList.remove('drm-blur');
-});
+imageModal.addEventListener('click', (e) => { if (e.target === imageModal) hideModal(); });
 
 document.addEventListener('keydown', (e) => {
     if (imageModal.classList.contains('active')) {
@@ -117,11 +95,9 @@ async function fetchServerStatus() {
     const javaStatus = document.getElementById('java-status');
     const javaDot = document.getElementById('java-dot');
     const javaText = document.getElementById('java-text');
-    
     const bedrockStatus = document.getElementById('bedrock-status');
     const bedrockDot = document.getElementById('bedrock-dot');
     const bedrockText = document.getElementById('bedrock-text');
-
     const playerText = document.getElementById('mc-players');
     const versionText = document.getElementById('mc-version');
 
@@ -134,13 +110,11 @@ async function fetchServerStatus() {
     try {
         const resJava = await fetch(`https://api.mcstatus.io/v2/status/java/${javaIP}`);
         const dataJava = await resJava.json();
-        
         if (dataJava.online) {
             isJavaOnline = true;
             javaStatus.className = 'mini-status online';
             javaDot.className = 'status-dot online';
             javaText.innerText = 'Online';
-            
             currentPlayers = dataJava.players.online;
             maxPlayers = dataJava.players.max;
             if (dataJava.version) serverVersion = dataJava.version.name_raw;
@@ -149,7 +123,7 @@ async function fetchServerStatus() {
             javaDot.className = 'status-dot offline';
             javaText.innerText = 'Offline';
         }
-    } catch (error) {
+    } catch (e) {
         javaStatus.className = 'mini-status offline';
         javaDot.className = 'status-dot offline';
         javaText.innerText = 'Offline';
@@ -158,21 +132,18 @@ async function fetchServerStatus() {
     try {
         const resBedrock = await fetch(`https://api.mcstatus.io/v2/status/bedrock/${bedrockIP}:${bedrockPort}`);
         const dataBedrock = await resBedrock.json();
-        
         if (dataBedrock.online) {
             isBedrockOnline = true;
             bedrockStatus.className = 'mini-status online';
             bedrockDot.className = 'status-dot online';
             bedrockText.innerText = 'Online';
-            
             if (!isJavaOnline) {
                 currentPlayers = dataBedrock.players.online;
                 maxPlayers = dataBedrock.players.max;
                 if (dataBedrock.version) serverVersion = dataBedrock.version.name;
             }
-        } 
-    } catch (error) {
-    }
+        }
+    } catch (e) {}
 
     if (!isBedrockOnline && isJavaOnline) {
         bedrockStatus.className = 'mini-status online';
@@ -194,28 +165,44 @@ async function fetchServerStatus() {
     }
 }
 
-let lastRotation = 0; 
+let lastRotation = 0;
+let isAnimating = false;
 
 async function refreshManual() {
     const btn = document.getElementById('refreshBtn');
     const icon = document.getElementById('refreshIcon');
     
-    if (btn.disabled) return;
+    if (isAnimating) return;
+    isAnimating = true;
     btn.disabled = true;
 
-    let rotation = lastRotation; 
+    document.getElementById('java-status').className = 'mini-status';
+    document.getElementById('java-dot').className = 'status-dot loading';
+    document.getElementById('java-text').innerText = 'Memuat...';
+
+    document.getElementById('bedrock-status').className = 'mini-status';
+    document.getElementById('bedrock-dot').className = 'status-dot loading';
+    document.getElementById('bedrock-text').innerText = 'Memuat...';
+
+    document.getElementById('mc-players').innerText = '-';
+    document.getElementById('mc-version').innerText = '-';
+
+    let rotation = lastRotation;
     let velocity = 0;
     let state = 'accelerating';
     let totalRotation = 0;
     let isFetching = true;
 
-    fetchServerStatus().then(() => { isFetching = false; });
+    setTimeout(() => {
+        fetchServerStatus().then(() => { isFetching = false; });
+    }, 1500);
 
     const safetyTimer = setTimeout(() => {
-        if (btn.disabled) {
+        if (isAnimating) {
+            isAnimating = false;
             btn.disabled = false;
         }
-    }, 5000);
+    }, 6000);
 
     function animate() {
         if (state === 'accelerating') {
@@ -234,7 +221,8 @@ async function refreshManual() {
 
         if (state === 'decelerating' && velocity === 0) {
             clearTimeout(safetyTimer);
-            lastRotation = rotation; 
+            lastRotation = rotation;
+            isAnimating = false;
             btn.disabled = false;
             return;
         }

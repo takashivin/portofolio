@@ -13,6 +13,12 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+a, button {
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -30,7 +36,6 @@ body {
     user-select: none;
 }
 
-/* Helper Class untuk Font Weight */
 .font-medium {
     font-weight: 500;
 }
@@ -301,20 +306,18 @@ p {
     align-items: center;
     justify-content: center;
     transition: transform 0.5s ease;
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0); 
 }
 
 .refresh-btn:hover {
     background: rgba(255, 255, 255, 0.1);
-    transform: scale(1.05);
+    transform: scale(1.05) translateZ(0);
 }
 
 .refresh-btn:active {
-    transform: scale(0.95);
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    transform: scale(0.95) translateZ(0);
 }
 
 .mini-status { 
@@ -583,19 +586,4 @@ p {
     border: 2px solid #6366f1; 
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); 
     display: none; 
-}
-
-.drm-protected {
-    -webkit-user-drag: none;
-    -khtml-user-drag: none;
-    -moz-user-drag: none;
-    -o-user-drag: none;
-    user-select: none;
-    pointer-events: none;
-}
-
-.drm-blur {
-    filter: blur(25px) grayscale(100%) !important;
-    opacity: 0.2 !important;
-    transition: filter 0.1s, opacity 0.1s;
 }
