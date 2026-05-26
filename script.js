@@ -98,16 +98,6 @@ window.addEventListener('focus', () => {
     ctscanImg.classList.remove('drm-blur');
 });
 
-document.addEventListener('keyup', (e) => {
-    if (imageModal.classList.contains('active')) {
-        if (e.key === 'PrintScreen') {
-            navigator.clipboard.writeText("DRM Protected: Penangkapan layar tidak diizinkan untuk dokumen medis ini.");
-            hideModal();
-            alert("Sistem Keamanan: Tangkapan layar dinonaktifkan untuk privasi.");
-        }
-    }
-});
-
 document.addEventListener('keydown', (e) => {
     if (imageModal.classList.contains('active')) {
         if ((e.ctrlKey && e.key === 's') || (e.ctrlKey && e.key === 'p')) {
