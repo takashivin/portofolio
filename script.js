@@ -194,20 +194,55 @@ async function fetchServerStatus() {
     }
 }
 
+let lastRotation = 0; 
+
 async function refreshManual() {
     const btn = document.getElementById('refreshBtn');
     const icon = document.getElementById('refreshIcon');
     
+    if (btn.disabled) return;
     btn.disabled = true;
-    icon.classList.add('spin-anim');
 
-    await fetchServerStatus();
+    let rotation = lastRotation; 
+    let velocity = 0;
+    let state = 'accelerating';
+    let totalRotation = 0;
+    let isFetching = true;
 
-    setTimeout(() => {
-        icon.classList.remove('spin-anim');
-        btn.disabled = false;
-    }, 600);
+    fetchServerStatus().then(() => { isFetching = false; });
+
+    const safetyTimer = setTimeout(() => {
+        if (btn.disabled) {
+            btn.disabled = false;
+        }
+    }, 5000);
+
+    function animate() {
+        if (state === 'accelerating') {
+            velocity += 0.8;
+            if (velocity >= 15) state = 'constant';
+        } else if (state === 'constant') {
+            if (totalRotation >= 720 && !isFetching) state = 'decelerating';
+        } else if (state === 'decelerating') {
+            velocity *= 0.92;
+            if (velocity < 0.2) velocity = 0;
+        }
+
+        rotation = (rotation + velocity) % 360;
+        totalRotation += velocity;
+        icon.style.transform = `rotate(${rotation}deg)`;
+
+        if (state === 'decelerating' && velocity === 0) {
+            clearTimeout(safetyTimer);
+            lastRotation = rotation; 
+            btn.disabled = false;
+            return;
+        }
+        requestAnimationFrame(animate);
+    }
+    
+    requestAnimationFrame(animate);
 }
 
 fetchServerStatus();
-setInterval(fetchServerStatus, 15000);
+setInterval(fetchServerStatus, 30000);
