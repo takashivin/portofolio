@@ -115,9 +115,13 @@ async function fetchServerStatus() {
             javaStatus.className = 'mini-status online';
             javaDot.className = 'status-dot online';
             javaText.innerText = 'Online';
-            currentPlayers = dataJava.players.online;
-            maxPlayers = dataJava.players.max;
+            
+            currentPlayers = dataJava.players?.online || 0;
+            maxPlayers = dataJava.players?.max || 0;
             if (dataJava.version) serverVersion = dataJava.version.name_raw;
+
+            playerText.innerText = `${currentPlayers}/${maxPlayers}`;
+            versionText.innerText = serverVersion;
         } else {
             javaStatus.className = 'mini-status offline';
             javaDot.className = 'status-dot offline';
@@ -137,10 +141,14 @@ async function fetchServerStatus() {
             bedrockStatus.className = 'mini-status online';
             bedrockDot.className = 'status-dot online';
             bedrockText.innerText = 'Online';
+            
             if (!isJavaOnline) {
-                currentPlayers = dataBedrock.players.online;
-                maxPlayers = dataBedrock.players.max;
+                currentPlayers = dataBedrock.players?.online || 0;
+                maxPlayers = dataBedrock.players?.max || 0;
                 if (dataBedrock.version) serverVersion = dataBedrock.version.name;
+
+                playerText.innerText = `${currentPlayers}/${maxPlayers}`;
+                versionText.innerText = serverVersion;
             }
         }
     } catch (e) {}
@@ -156,10 +164,7 @@ async function fetchServerStatus() {
         bedrockText.innerText = 'Offline';
     }
 
-    if (isJavaOnline || isBedrockOnline) {
-        playerText.innerText = `${currentPlayers}/${maxPlayers}`;
-        versionText.innerText = serverVersion;
-    } else {
+    if (!isJavaOnline && !isBedrockOnline) {
         playerText.innerText = '-';
         versionText.innerText = '-';
     }
